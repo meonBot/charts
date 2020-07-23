@@ -1,3 +1,4 @@
+{{- if .Values.shards }}
 {{- $replicas := .Values.shards | int }}
 {{- range $i, $e := until $replicas }}
 apiVersion: apps/v1
@@ -93,7 +94,7 @@ spec:
                   fieldPath: metadata.name
             - name: MONGODB_MONGOS_HOST
               value: {{ include "mongodb-sharded.fullname" $ }}
-            - name: MONGODB_PRIMARY_HOST
+            - name: MONGODB_INITIAL_PRIMARY_HOST
               value: {{ printf "%s-shard%d-data-0.%s-headless.%s.svc.%s" (include "mongodb-sharded.fullname" $ ) $i (include "mongodb-sharded.fullname" $ ) $.Release.Namespace $.Values.clusterDomain }}
             - name: MONGODB_REPLICA_SET_NAME
               value: {{ printf "%s-shard-%d" ( include "mongodb-sharded.fullname" $ ) $i }}
@@ -269,13 +270,13 @@ spec:
         {{- if $.Values.common.initScriptsCM }}
         - name: custom-init-scripts-configmap
           configMap:
-            name: {{ include "mongodb-sharded.initScriptsCM" . }}
+            name: {{ include "mongodb-sharded.initScriptsCM" $ }}
             defaultMode: 0755
         {{- end }}
         {{- if $.Values.common.initScriptsSecret }}
         - name: custom-init-scripts-secret
           secret:
-            name: {{ include "mongodb-sharded.initScriptsSecret" . }}
+            name: {{ include "mongodb-sharded.initScriptsSecret" $ }}
             defaultMode: 0755
         {{- end }}
         {{- if or $.Values.shardsvr.dataNode.config $.Values.shardsvr.dataNode.configCM }}
@@ -312,5 +313,6 @@ spec:
   {{- end }}
 {{- if lt $i (sub $replicas 1) }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}

@@ -18,7 +18,7 @@ spec:
     - host: {{ .Values.ingress.hostname }}
       http:
         paths:
-          - path: /
+          - path: {{ .Values.ingress.path }}
             backend:
               serviceName: {{ template "rabbitmq.fullname" . }}
               servicePort: http-stats
@@ -30,14 +30,14 @@ spec:
           - path: {{ default "/" .path }}
             backend:
               serviceName: {{ template "rabbitmq.fullname" $ }}
-              servicePort: http
+              servicePort: http-stats
     {{- end }}
   {{- if or .Values.ingress.tls .Values.ingress.extraTls }}
   tls:
     {{- if .Values.ingress.tls }}
     - hosts:
         - {{ .Values.ingress.hostname }}
-      secretName: {{ printf "%s-tls" .Values.ingress.hostname }}
+      secretName: {{ template "rabbitmq.ingressSecretTLSName" . }}
     {{- end }}
     {{- if .Values.ingress.extraTls }}
     {{- toYaml .Values.ingress.extraTls | nindent 4 }}

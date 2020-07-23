@@ -1,3 +1,4 @@
+{{- if not .Values.configsvr.external.host }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -88,7 +89,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: MONGODB_PRIMARY_HOST
+            - name: MONGODB_INITIAL_PRIMARY_HOST
               value: {{ include "mongodb-sharded.configServer.primaryHost" . }}
             - name: MONGODB_REPLICA_SET_NAME
               value: {{ printf "%s-configsvr" ( include "mongodb-sharded.fullname" . ) }}
@@ -330,3 +331,4 @@ spec:
         - name: datadir
           emptyDir: {}
   {{- end }}
+{{- end }}

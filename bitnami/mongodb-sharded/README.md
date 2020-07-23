@@ -90,6 +90,8 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `common.extraEnvVarsSecret`                   | Secret containing extra env vars to be added to all pods in the cluster (evaluated as a template)                                                         | `nil`                                                    |
 | `common.extraVolumes`                         | Array of extra volumes to be added to all pods in the cluster  (evaluated as template). Requires setting `common.extraVolumeMounts`                       | `nil`                                                    |
 | `common.extraVolumeMounts`                    | Array of extra volume mounts to be added to all pods in the cluster (evaluated as template). Normally used with `common.extraVolumes`.                    | `nil`                                                    |
+| `common.initScriptsCM`                        | ConfigMap containing `/docker-entrypoint-initdb.d` scripts to be executed at initialization time (evaluated as a template)                                | `nil`                                                    |
+| `common.initScriptsSecret`                    | Secret containing `/docker-entrypoint-initdb.d` scripts to be executed at initialization time (that contain sensitive data). Evaluated as a template.     | `nil`                                                    |
 | `service.name`                                | Kubernetes service name                                                                                                                                   | `nil`                                                    |
 | `service.annotations`                         | Kubernetes service annotations                                                                                                                            | `{}`                                                     |
 | `service.type`                                | Kubernetes Service type                                                                                                                                   | `ClusterIP`                                              |
@@ -120,8 +122,6 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `readinessProbe.timeoutSeconds`               | When the probe times out                                                                                                                                  | `5`                                                      |
 | `readinessProbe.failureThreshold`             | Minimum consecutive failures for the probe to be considered failed after having succeeded.                                                                | `6`                                                      |
 | `readinessProbe.successThreshold`             | Minimum consecutive successes for the probe to be considered successful after having failed.                                                              | `1`                                                      |
-| `initScriptsCM`                               | ConfigMap containing `/docker-entrypoint-initdb.d` scripts to be executed at initialization time (evaluated as a template)                                | `nil`                                                    |
-| `initScriptsSecret`                           | Secret containing `/docker-entrypoint-initdb.d` scripts to be executed at initialization time (that contain sensitive data). Evaluated as a template.     | `nil`                                                    |
 
 ### Config Server configuration
 
@@ -157,6 +157,10 @@ The following table lists the configurable parameters of the MongoDB chart and t
 | `configsvr.persistence.accessModes`           | Use volume as ReadOnly or ReadWrite                                                                                                                       | `[ReadWriteOnce]`                                        |
 | `configsvr.persistence.size`                  | Size of data volume                                                                                                                                       | `8Gi`                                                    |
 | `configsvr.persistence.annotations`           | Persistent Volume annotations                                                                                                                             | `{}`                                                     |
+| `configsvr.external.host`           | Primary node of an external config server replicaset                                                                                                                              | `nil`                                                     |
+| `configsvr.external.rootPassword`           | Root passworrd of the external config server replicaset                                                                                                                              | `nil`                                                     |
+| `configsvr.external.replicasetName`           | Replicaset name of an external config server                                                                                                                              | `nil`                                                     |
+| `configsvr.external.replicasetKey`           | Replicaset key of an external config server                                                                                                                              | `nil`                                                     |
 
 ### Mongos configuration
 
@@ -391,6 +395,10 @@ extraEnvVars:
 ```
 
 Alternatively, you can use a ConfigMap or a Secret with the environment variables. To do so, use the `extraEnvVarsCM` or the `extraEnvVarsSecret` values.
+
+### Using an external config server
+
+It is possible to not deploy any shards or a config server. For example, it is possible to simply deploy `mongos` instances that point to an external MongoDB sharded database. If that is the case, set the `configsvr.external.host` and `configsvr.external.replicasetName` for the mongos instances to connect. For authentication, set the `configsvr.external.rootPassword` and `configsvr.external.replicasetKey` values.
 
 ## Persistence
 
